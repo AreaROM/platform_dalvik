@@ -30,9 +30,7 @@
 #include "OptInvocation.h"
 #include "DexFile.h"
 
-ifeq ($(DEXOPT_DATA_ONLY),true)
 #include <cutils/properties.h>
-endif
 
 static const char* kClassesDex = "classes.dex";
 
@@ -53,13 +51,11 @@ char* dexOptGenerateCacheFileName(const char* fileName, const char* subFileName)
     char absoluteFile[sizeof(nameBuf)];
     const size_t kBufLen = sizeof(nameBuf) - 1;
     const char* dataRoot;
-ifeq ($(DEXOPT_DATA_ONLY),true)
     const char* dexRoot;
     const char* cacheRoot;
     const char* systemRoot;
-    char dexoptDataOnly[PROPERTY_VALUE_MAX];
-endif
     char* cp;
+    char dexoptDataOnly[PROPERTY_VALUE_MAX];
 
     /*
      * Get the absolute path of the Jar or DEX file.
@@ -104,20 +100,16 @@ endif
      */
 
     /* load paths from the system environment */
-    dataRoot = getenv("ANDROID_DATA");
-ifeq ($(DEXOPT_DATA_ONLY),true)
     cacheRoot = getenv("ANDROID_CACHE");
+    dataRoot = getenv("ANDROID_DATA");
     systemRoot = getenv("ANDROID_ROOT");
-endif
 
     /* make sure we didn't get any NULL values */
+    if (cacheRoot == NULL)
+        cacheRoot = "/cache";
 
     if (dataRoot == NULL)
         dataRoot = "/data";
-
-ifeq ($(DEXOPT_DATA_ONLY),true)
-    if (cacheRoot == NULL)
-        cacheRoot = "/cache";
 
     if (systemRoot == NULL)
         systemRoot = "/system";
@@ -132,7 +124,6 @@ ifeq ($(DEXOPT_DATA_ONLY),true)
             dexRoot = cacheRoot;
         }
     }
-endif
 
     snprintf(nameBuf, kBufLen, "%s/%s", dexRoot, kDexCachePath);
 
